@@ -88,6 +88,10 @@ p {
     all: unset;
 }
 
+#exchangeRate {
+    max-width: 70px;
+}
+
 table {
     margin-top: 1.5rem;
 }
@@ -113,6 +117,10 @@ td, th {
     min-width: auto;
 }
 
+th:not(:last-child) {
+    min-width: 143px;
+}
+
 .arrowDown {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
@@ -135,12 +143,4 @@ td, th {
     border-bottom: 10px solid transparent;
     margin-right: 0.3rem;
     display: inline-block;
-}
-
-#exchangeRate {
-    max-width: 70px;
-}
-
-th:not(:last-child) {
-    min-width: 143px;
 }
