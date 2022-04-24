@@ -1,0 +1,17 @@
+{
+  "name": "playbook",
+  "version": "1.0.0",
+  "description": "Recounting list of stuffs",
+  "main": "index.js",
+  "scripts": {
+    "compile": "tsc --watch",
+    "check": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GrzegorzSpytek/playbook.git"
+  },
+  "keywords": [],
+  "author": "Grzegorz Spytek",
+  "license": "ISC"
+}

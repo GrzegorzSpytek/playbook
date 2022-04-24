@@ -1,0 +1,119 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    padding: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.form {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    column-gap: 3rem;
+    row-gap: 1rem;
+    grid-template-areas:
+        "header header currency"
+        "titleLabel titleInput ."
+        "amountLabel amountInput button"
+        "table table table"
+        "sum updateButton updateButton"
+}
+
+label {
+    min-width: 130px;
+}
+
+.header {
+    grid-area: header;
+}
+
+.titleLabel {
+    grid-area: titleLabel;
+}
+
+#titleOfTransaction {
+    grid-area: titleInput;
+}
+
+.amountLabel {
+    grid-area: amountLabel;
+}
+
+#addButton {
+    grid-area: button;
+    min-width: 120px;
+    margin: auto;
+}
+
+#amount {
+    grid-area: amountInput;
+}
+
+.itemList {
+    grid-area: table;
+}
+
+p {
+    grid-area: sum;
+}
+
+#updateButton {
+    grid-area: updateButton;
+    min-width: 120px;
+    margin: auto;
+}
+
+.currency {
+    margin: auto;
+    min-width: 150px;
+}
+
+#deleteButton {
+    all: unset;
+}
+
+table {
+    margin-top: 1.5rem;
+}
+
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table th {
+    background-color: rgb(190, 190, 190);
+    text-align: left;
+    white-space: nowrap;
+}
+
+table tr:nth-child(odd){
+    background-color: rgb(235, 235, 235);
+}
+
+td, th {
+    padding: 0.6rem;
+    min-width: auto;
+}
+
+.arrow {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 10px solid black;
+    margin-right: 0.3rem;
+    display: inline-block;
+}
+
+#exchangeRate {
+    max-width: 70px;
+}
