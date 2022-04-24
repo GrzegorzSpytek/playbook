@@ -25,7 +25,7 @@ body {
         "titleLabel titleInput ."
         "amountLabel amountInput button"
         "table table table"
-        "sum updateButton updateButton"
+        "sum updateButton restartButton"
 }
 
 label {
@@ -72,6 +72,13 @@ p {
     margin: auto;
 }
 
+#restartButton {
+    grid-area: restartButton;
+    min-width: 120px;
+    margin: auto;
+}
+
+
 .currency {
     margin: auto;
     min-width: 150px;
@@ -106,7 +113,7 @@ td, th {
     min-width: auto;
 }
 
-.arrow {
+.arrowDown {
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 10px solid black;
@@ -114,6 +121,26 @@ td, th {
     display: inline-block;
 }
 
+.arrowUp {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 10px solid black;
+    margin-right: 0.3rem;
+    display: inline-block;
+}
+
+.arrowNone {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 10px solid transparent;
+    margin-right: 0.3rem;
+    display: inline-block;
+}
+
 #exchangeRate {
     max-width: 70px;
+}
+
+th:not(:last-child) {
+    min-width: 143px;
 }

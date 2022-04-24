@@ -12,23 +12,25 @@
     <div class="container">
         <div class="form">
             <h1 class="header">List of expenses</h1>
-            <span class="currency">1EUR = <input type="number" id="exchangeRate" value="4.50"> PLN</span>
+            <span class="currency">1EUR = <input type="number" id="exchangeRate" value="4.50" min="0.01" > PLN</span>
 
             <label class= "titleLabel" for="titleOfTransaction">Title in transaction</label>
             <input type="text" id="titleOfTransaction">
             <label class= "amountLabel" for="amount">Amount (in PLN)</label>
-            <input type="number" id="amount">
+            <input type="number" id="amount"  min="0.01">
             <button id="addButton">Add</button>
 
             <table class="itemList">
                 <tr>
-                    <th id="th_1"><i class="arrow"></i>Title</th>
-                    <th id="th_2"><i class="arrow"></i>Amount (PLN)</th>
-                    <th id="th_3"><i class="arrow"></i>Amount (EUR)</th>
-                    <th id="th_4"><i class="arrow"></i>Options</th>
+                    <th id="th_1"><i class="arrowNone"></i>Title</th>
+                    <th id="th_2"><i class="arrowNone"></i>Amount (PLN)</th>
+                    <th id="th_3"><i class="arrowNone"></i>Amount (EUR)</th>
+                    <th id="th_4">Options</th>
                 </tr>
             </table>
-            <p id="sum">Sum: 0 PLN (0 EUR)</p><button id="updateButton">Recalculate Currency</button>
+            <p id="sum">Sum: 0 PLN (0 EUR)</p>
+            <button id="updateButton">Recalculate Currency</button>
+            <button id="restartButton">Clear Filter</button>
         </div>
     </div>
 </body>

@@ -5,8 +5,10 @@ window.onload = function () {
     var exchangeRateInput = document.getElementById('exchangeRate');
     var addButton = document.getElementById('addButton');
     var updateButton = document.getElementById('updateButton');
-    var tableHeader = Array.prototype.slice.call(document.getElementsByTagName('th'));
+    var restartButton = document.getElementById('restartButton');
+    var tableHeaders = Array.prototype.slice.call(document.getElementsByTagName('th'));
     var rowCounter = 1;
+    var lastSortedElement = 0;
     addButton.addEventListener("click", function () {
         var isNotValid = !validateUserInput();
         if (isNotValid)
@@ -19,12 +21,13 @@ window.onload = function () {
         updateSumValue();
         transactionInput.value = '';
         amountInput.value = '';
+        defaultSortTable();
     });
     amountInput.addEventListener("keyup", function () {
-        CheckForRoundingDecimalPoint(this);
+        validationForROundDecimalPoint(this);
     });
     exchangeRateInput.addEventListener("keyup", function () {
-        CheckForRoundingDecimalPoint(this, 3);
+        validationForROundDecimalPoint(this, 3);
     });
     updateButton.addEventListener("click", function () {
         var isNotValid = !validateForClickUpdateButton();
@@ -32,11 +35,14 @@ window.onload = function () {
             return;
         recalculateAmountInEur();
     });
-    tableHeader.forEach(function (element, index) {
+    restartButton.addEventListener("click", function () {
+        defaultSortTable();
+    });
+    tableHeaders.forEach(function (element, index) {
         element.addEventListener("click", function () {
             if (index > 2)
                 return;
-            var clickedHeaderId = this.id.split('_')[1];
+            var clickedHeaderId = Number(this.id.split('_')[1]);
             sortTable(clickedHeaderId);
         });
     });
@@ -45,39 +51,55 @@ window.onload = function () {
         var characterNumbers = transactionInput.value.length;
         var amount = Number(amountInput.value);
         var exchangeRate = Number(exchangeRateInput.value);
-        var changeInputBackground = function (transactionInput, color) { return transactionInput.style.backgroundColor = color; };
         if (characterNumbers < 5) {
-            callAlter(transactionInput, alert('please type at least 5 characters'));
+            callAlert(transactionInput, alert('please type at least 5 characters'));
             isValid = 0;
         }
         else if (!amount) {
-            callAlter(amountInput, alert('Insert right amount'));
+            callAlert(amountInput, alert('Insert right amount'));
+            isValid = 0;
+        }
+        else if (amount < 0) {
+            callAlert(amountInput, alert('The amount cannot be negative'));
             isValid = 0;
         }
         else if (!exchangeRate) {
-            callAlter(exchangeRateInput, alert('Insert exchange rate'));
+            callAlert(exchangeRateInput, alert('Insert exchange rate'));
             isValid = 0;
         }
-        return isValid;
+        else if (exchangeRate < 0) {
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'));
+            isValid = 0;
+        }
+        return Boolean(isValid);
     }
     function validateForClickUpdateButton() {
         var isValid = 1;
-        var allValuesArray = document.querySelectorAll('#amountPlnTd');
+        var isTableExist = isAnyRowInTable();
+        var amount = Number(amountInput.value);
         var exchangeRate = Number(exchangeRateInput.value);
         if (!exchangeRate) {
-            callAlter(exchangeRateInput, alert('Insert exchange rate'));
+            callAlert(exchangeRateInput, alert('Insert exchange rate'));
             isValid = 0;
         }
-        else if (!allValuesArray.length) {
+        else if (exchangeRate < 0) {
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'));
+            isValid = 0;
+        }
+        else if (amount < 0) {
+            callAlert(amountInput, alert('The amount cannot be negative'));
+            isValid = 0;
+        }
+        else if (!isTableExist) {
             alert('Insert any value to update table');
             isValid = 0;
         }
-        return isValid;
+        return Boolean(isValid);
     }
-    function CheckForRoundingDecimalPoint(inputField, decimalPointLength) {
+    function validationForROundDecimalPoint(inputField, decimalPointLength) {
         if (decimalPointLength === void 0) { decimalPointLength = 2; }
         var inputValue = inputField.value;
-        var inputValueDecimalPoint = inputValue.split(".")[1] || 0;
+        var inputValueDecimalPoint = inputValue.split(".")[1] || '0';
         var inputValueDecimalPointCounter = inputValueDecimalPoint.length;
         if (!inputValueDecimalPoint)
             return;
@@ -169,7 +191,7 @@ window.onload = function () {
         });
         updateSumValue();
     }
-    function callAlter(inputField, alertMessage) {
+    function callAlert(inputField, alertMessage) {
         var changeInputBackground = function (inputField, color) { return inputField.style.backgroundColor = color; };
         changeInputBackground(inputField, 'red');
         alertMessage;
@@ -178,11 +200,45 @@ window.onload = function () {
             inputField.removeEventListener("click", function () { return inputField; });
         });
     }
-    function sortTable(n) {
-        var columnId = n - 1;
-        var i, shouldSwitch, dir, switchCount = 0;
+    function isAnyRowInTable() {
+        var allValuesArray = document.querySelectorAll('#amountPlnTd');
+        return allValuesArray.length;
+    }
+    function defaultSortTable() {
+        var i;
+        var shouldSwitch = false;
         var switching = true;
-        dir = "asc";
+        while (switching) {
+            switching = false;
+            var rows = document.querySelectorAll("tr");
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                var x = Number(rows[i].id.split("_")[1]);
+                var y = Number(rows[i + 1].id.split("_")[1]);
+                ;
+                if (x > y) {
+                    tableHeaders.forEach(function (thElement) {
+                        clearArrows(thElement.children[0]);
+                    });
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+    function sortTable(column) {
+        var columnId = column - 1;
+        var i;
+        var shouldSwitch = false;
+        var switchCount = 0;
+        var switching = true;
+        var sortingDirection = "asc";
+        var tableHeadersClicked = document.getElementsByTagName("th")[columnId];
+        var arrowElement = tableHeadersClicked.children[0];
         while (switching) {
             switching = false;
             var rows = document.querySelectorAll("tr");
@@ -190,30 +246,47 @@ window.onload = function () {
                 shouldSwitch = false;
                 var x = rows[i].getElementsByTagName("td")[columnId];
                 var y = rows[i + 1].getElementsByTagName("td")[columnId];
-                if (dir == "asc") {
+                if (sortingDirection === "asc") {
                     if (x.innerText.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        tableHeaders.forEach(function (thElement) {
+                            clearArrows(thElement.children[0]);
+                        });
+                        arrowElement.classList.value = "arrowUp";
                         shouldSwitch = true;
                         break;
                     }
                 }
-                else if (dir == "desc") {
+                else if (sortingDirection === "desc") {
                     if (x.innerText.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        tableHeaders.forEach(function (thElement) {
+                            clearArrows(thElement.children[0]);
+                        });
+                        arrowElement.classList.value = "arrowDown";
                         shouldSwitch = true;
                         break;
                     }
                 }
             }
+            if (switchCount === 0)
+                lastSortedElement = column;
             if (shouldSwitch) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
                 switchCount++;
             }
             else {
-                if (switchCount == 0 && dir == "asc") {
-                    dir = "desc";
+                if (switchCount === 0 && sortingDirection === "asc" && lastSortedElement == column) {
+                    sortingDirection = "desc";
                     switching = true;
                 }
             }
+        }
+    }
+    function clearArrows(arrow) {
+        if (arrow) {
+            arrow.classList.add("arrowNone");
+            arrow.classList.remove("arrowUp");
+            arrow.classList.remove("arrowDown");
         }
     }
 };
