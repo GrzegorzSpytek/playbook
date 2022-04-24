@@ -1,5 +1,5 @@
 window.onload = function () {
-    var SUM_TEMPLATE = "Sum: {amountPln} PLN ({amountEur} EUR)";
+    var SUM_TEMPLATE = 'Sum: {amountPln} PLN ({amountEur} EUR)';
     var transactionInput = document.getElementById('titleOfTransaction');
     var amountInput = document.getElementById('amount');
     var exchangeRateInput = document.getElementById('exchangeRate');
@@ -9,12 +9,12 @@ window.onload = function () {
     var tableHeaders = Array.prototype.slice.call(document.getElementsByTagName('th'));
     var rowCounter = 1;
     var lastSortedElement = 0;
-    addButton.addEventListener("click", function () {
+    addButton.addEventListener('click', function () {
         var isNotValid = !validateUserInput();
         if (isNotValid)
             return;
         var title = transactionInput.value;
-        var amount = amountInput.value;
+        var amount = Number(amountInput.value);
         var row = addRow(title, amount);
         var table = document.getElementsByTagName('table')[0];
         table.appendChild(row);
@@ -23,23 +23,23 @@ window.onload = function () {
         amountInput.value = '';
         defaultSortTable();
     });
-    amountInput.addEventListener("keyup", function () {
-        validationForROundDecimalPoint(this);
+    amountInput.addEventListener('keyup', function () {
+        validationForDecimalPoint(this);
     });
-    exchangeRateInput.addEventListener("keyup", function () {
-        validationForROundDecimalPoint(this, 3);
+    exchangeRateInput.addEventListener('keyup', function () {
+        validationForDecimalPoint(this, 3);
     });
-    updateButton.addEventListener("click", function () {
+    updateButton.addEventListener('click', function () {
         var isNotValid = !validateForClickUpdateButton();
         if (isNotValid)
             return;
         recalculateAmountInEur();
     });
-    restartButton.addEventListener("click", function () {
+    restartButton.addEventListener('click', function () {
         defaultSortTable();
     });
     tableHeaders.forEach(function (element, index) {
-        element.addEventListener("click", function () {
+        element.addEventListener('click', function () {
             if (index > 2)
                 return;
             var clickedHeaderId = Number(this.id.split('_')[1]);
@@ -52,7 +52,11 @@ window.onload = function () {
         var amount = Number(amountInput.value);
         var exchangeRate = Number(exchangeRateInput.value);
         if (characterNumbers < 5) {
-            callAlert(transactionInput, alert('please type at least 5 characters'));
+            callAlert(transactionInput, alert('Please type at least 5 characters'));
+            isValid = 0;
+        }
+        else if (characterNumbers > 50) {
+            callAlert(transactionInput, alert("Cannot add title longer than 50 characters. You have inserted already: ".concat(characterNumbers)));
             isValid = 0;
         }
         else if (!amount) {
@@ -63,12 +67,20 @@ window.onload = function () {
             callAlert(amountInput, alert('The amount cannot be negative'));
             isValid = 0;
         }
+        else if (amount > 9999999) {
+            callAlert(amountInput, alert('The amount cannot higher than 999999'));
+            isValid = 0;
+        }
         else if (!exchangeRate) {
             callAlert(exchangeRateInput, alert('Insert exchange rate'));
             isValid = 0;
         }
         else if (exchangeRate < 0) {
             callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'));
+            isValid = 0;
+        }
+        else if (exchangeRate > 1000) {
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be higher than 1000'));
             isValid = 0;
         }
         return Boolean(isValid);
@@ -86,6 +98,10 @@ window.onload = function () {
             callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'));
             isValid = 0;
         }
+        else if (exchangeRate > 1000) {
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be higher than 1000'));
+            isValid = 0;
+        }
         else if (amount < 0) {
             callAlert(amountInput, alert('The amount cannot be negative'));
             isValid = 0;
@@ -96,10 +112,10 @@ window.onload = function () {
         }
         return Boolean(isValid);
     }
-    function validationForROundDecimalPoint(inputField, decimalPointLength) {
+    function validationForDecimalPoint(inputField, decimalPointLength) {
         if (decimalPointLength === void 0) { decimalPointLength = 2; }
         var inputValue = inputField.value;
-        var inputValueDecimalPoint = inputValue.split(".")[1] || '0';
+        var inputValueDecimalPoint = inputValue.split('.')[1] || '0';
         var inputValueDecimalPointCounter = inputValueDecimalPoint.length;
         if (!inputValueDecimalPoint)
             return;
@@ -110,12 +126,13 @@ window.onload = function () {
     }
     function addRow(title, amount) {
         var row = document.createElement('tr');
-        row.id = "row_" + rowCounter;
+        row.id = 'row_' + rowCounter;
         var column;
         var exchangeRate = Number(exchangeRateInput.value);
         for (var i = 0; i < 4; i++) {
-            var text = ((i === 0) ? title : (i === 1) ? amount : (i === 2) ? String(calculatePlnToEur(Number(amount), exchangeRate)) : '');
+            var text = ((i === 0) ? title : (i === 1) ? String(amount.toFixed(2)) : (i === 2) ? calculatePlnToEur(amount, exchangeRate).toFixed(2) : '');
             var id = ((i === 0) ? 'titleTd' : (i === 1) ? 'amountPlnTd' : (i === 2) ? 'amountEurTd' : '');
+            console.log(text);
             column = createColumn(text, id);
             if (i == 3) {
                 createDeleteButton(column);
@@ -137,8 +154,8 @@ window.onload = function () {
             button.innerText = 'Delete';
             button.id = 'deleteButton';
             column.appendChild(button);
-            button.addEventListener("click", function () {
-                var rowId = this.closest("tr").id;
+            button.addEventListener('click', function () {
+                var rowId = this.closest('tr').id;
                 deleteRow(rowId);
                 updateSumValue();
             });
@@ -187,7 +204,7 @@ window.onload = function () {
             var plnValue = Number(element.innerHTML);
             var eurValue = calculatePlnToEur(plnValue, exchangeRate);
             var sibling = element.nextSibling;
-            sibling.innerText = eurValue.toString();
+            sibling.innerText = eurValue.toFixed(2);
         });
         updateSumValue();
     }
@@ -195,9 +212,9 @@ window.onload = function () {
         var changeInputBackground = function (inputField, color) { return inputField.style.backgroundColor = color; };
         changeInputBackground(inputField, 'red');
         alertMessage;
-        inputField.addEventListener("click", function () {
+        inputField.addEventListener('click', function () {
             changeInputBackground(inputField, null);
-            inputField.removeEventListener("click", function () { return inputField; });
+            inputField.removeEventListener('focus', function () { return inputField; });
         });
     }
     function isAnyRowInTable() {
@@ -207,16 +224,17 @@ window.onload = function () {
     function defaultSortTable() {
         var i;
         var shouldSwitch = false;
+        var switchCount = 0;
         var switching = true;
         while (switching) {
             switching = false;
-            var rows = document.querySelectorAll("tr");
+            var rows = document.querySelectorAll('tr');
             for (i = 1; i < (rows.length - 1); i++) {
                 shouldSwitch = false;
-                var x = Number(rows[i].id.split("_")[1]);
-                var y = Number(rows[i + 1].id.split("_")[1]);
+                var firstElement = Number(rows[i].id.split('_')[1]);
+                var secondElement = Number(rows[i + 1].id.split('_')[1]);
                 ;
-                if (x > y) {
+                if (firstElement > secondElement) {
                     tableHeaders.forEach(function (thElement) {
                         clearArrows(thElement.children[0]);
                     });
@@ -227,6 +245,7 @@ window.onload = function () {
             if (shouldSwitch) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
+                switchCount++;
             }
         }
     }
@@ -236,34 +255,62 @@ window.onload = function () {
         var shouldSwitch = false;
         var switchCount = 0;
         var switching = true;
-        var sortingDirection = "asc";
-        var tableHeadersClicked = document.getElementsByTagName("th")[columnId];
+        var sortingDirection = 'asc';
+        var tableHeadersClicked = document.getElementsByTagName('th')[columnId];
         var arrowElement = tableHeadersClicked.children[0];
         while (switching) {
             switching = false;
-            var rows = document.querySelectorAll("tr");
+            var rows = document.querySelectorAll('tr');
             for (i = 1; i < (rows.length - 1); i++) {
                 shouldSwitch = false;
-                var x = rows[i].getElementsByTagName("td")[columnId];
-                var y = rows[i + 1].getElementsByTagName("td")[columnId];
-                if (sortingDirection === "asc") {
-                    if (x.innerText.toLowerCase() > y.innerHTML.toLowerCase()) {
-                        tableHeaders.forEach(function (thElement) {
-                            clearArrows(thElement.children[0]);
-                        });
-                        arrowElement.classList.value = "arrowUp";
-                        shouldSwitch = true;
-                        break;
+                var firstElement = rows[i].getElementsByTagName('td')[columnId];
+                var secondElement = rows[i + 1].getElementsByTagName('td')[columnId];
+                var compareOneNumber = Number(firstElement.innerText);
+                var compareTwoNumber = Number(secondElement.innerText);
+                var compareOneString = firstElement.innerText;
+                var compareTwoString = secondElement.innerText;
+                if (compareOneNumber) {
+                    if (sortingDirection === 'asc') {
+                        if (compareOneNumber > compareTwoNumber) {
+                            tableHeaders.forEach(function (thElement) {
+                                clearArrows(thElement.children[0]);
+                            });
+                            arrowElement.classList.value = 'arrowUp';
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                    else if (sortingDirection === 'desc') {
+                        if (compareOneNumber < compareTwoNumber) {
+                            tableHeaders.forEach(function (thElement) {
+                                clearArrows(thElement.children[0]);
+                            });
+                            arrowElement.classList.value = 'arrowDown';
+                            shouldSwitch = true;
+                            break;
+                        }
                     }
                 }
-                else if (sortingDirection === "desc") {
-                    if (x.innerText.toLowerCase() < y.innerHTML.toLowerCase()) {
-                        tableHeaders.forEach(function (thElement) {
-                            clearArrows(thElement.children[0]);
-                        });
-                        arrowElement.classList.value = "arrowDown";
-                        shouldSwitch = true;
-                        break;
+                else {
+                    if (sortingDirection === 'asc') {
+                        if (compareOneString.toLocaleLowerCase() > compareTwoString.toLocaleLowerCase()) {
+                            tableHeaders.forEach(function (thElement) {
+                                clearArrows(thElement.children[0]);
+                            });
+                            arrowElement.classList.value = 'arrowUp';
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                    else if (sortingDirection === 'desc') {
+                        if (compareOneString.toLocaleLowerCase() < compareTwoString.toLocaleLowerCase()) {
+                            tableHeaders.forEach(function (thElement) {
+                                clearArrows(thElement.children[0]);
+                            });
+                            arrowElement.classList.value = 'arrowDown';
+                            shouldSwitch = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -275,8 +322,8 @@ window.onload = function () {
                 switchCount++;
             }
             else {
-                if (switchCount === 0 && sortingDirection === "asc" && lastSortedElement == column) {
-                    sortingDirection = "desc";
+                if (switchCount === 0 && sortingDirection === 'asc' && lastSortedElement == column) {
+                    sortingDirection = 'desc';
                     switching = true;
                 }
             }
@@ -284,9 +331,9 @@ window.onload = function () {
     }
     function clearArrows(arrow) {
         if (arrow) {
-            arrow.classList.add("arrowNone");
-            arrow.classList.remove("arrowUp");
-            arrow.classList.remove("arrowDown");
+            arrow.classList.add('arrowNone');
+            arrow.classList.remove('arrowUp');
+            arrow.classList.remove('arrowDown');
         }
     }
 };

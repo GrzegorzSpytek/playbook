@@ -12,12 +12,12 @@
     <div class="container">
         <div class="form">
             <h1 class="header">List of expenses</h1>
-            <span class="currency">1EUR = <input type="number" id="exchangeRate" value="4.50" min="0.01" > PLN</span>
+            <span class="currency">1EUR = <input type="number" id="exchangeRate" value="4.50" min="0.01" max="10"> PLN</span>
 
             <label class= "titleLabel" for="titleOfTransaction">Title in transaction</label>
             <input type="text" id="titleOfTransaction">
             <label class= "amountLabel" for="amount">Amount (in PLN)</label>
-            <input type="number" id="amount"  min="0.01">
+            <input type="number" id="amount"  min="0.01"  max="1000000">
             <button id="addButton">Add</button>
 
             <table class="itemList">
@@ -30,7 +30,7 @@
             </table>
             <p id="sum">Sum: 0 PLN (0 EUR)</p>
             <button id="updateButton">Recalculate Currency</button>
-            <button id="restartButton">Clear Filter</button>
+            <button id="restartButton">Clear Sorting</button>
         </div>
     </div>
 </body>

@@ -1,5 +1,5 @@
 window.onload = () => {
-    const SUM_TEMPLATE: String = "Sum: {amountPln} PLN ({amountEur} EUR)";
+    const SUM_TEMPLATE: String = 'Sum: {amountPln} PLN ({amountEur} EUR)';
 
     const transactionInput: HTMLInputElement = document.getElementById('titleOfTransaction') as HTMLInputElement;
     const amountInput: HTMLInputElement = document.getElementById('amount') as HTMLInputElement;
@@ -12,12 +12,12 @@ window.onload = () => {
     let rowCounter: number = 1;
     let lastSortedElement: number = 0;
 
-    addButton.addEventListener("click", function () {
+    addButton.addEventListener('click', function () {
         const isNotValid: boolean = !validateUserInput();
         if (isNotValid) return
 
         const title: string = transactionInput.value;
-        const amount: string = amountInput.value;
+        const amount: number = Number(amountInput.value);
         const row: HTMLTableRowElement = addRow(title, amount);
         const table: HTMLTableElement = document.getElementsByTagName('table')[0] as HTMLTableElement;
         table.appendChild(row);
@@ -28,27 +28,27 @@ window.onload = () => {
         defaultSortTable();
     })
 
-    amountInput.addEventListener("keyup", function () {
-        validationForROundDecimalPoint(this)
+    amountInput.addEventListener('keyup', function () {
+        validationForDecimalPoint(this);
     })
 
-    exchangeRateInput.addEventListener("keyup", function () {
-        validationForROundDecimalPoint(this, 3)
+    exchangeRateInput.addEventListener('keyup', function () {
+        validationForDecimalPoint(this, 3);
     })
 
-    updateButton.addEventListener("click", function () {
+    updateButton.addEventListener('click', function () {
         const isNotValid: boolean = !validateForClickUpdateButton();
         if (isNotValid) return
 
         recalculateAmountInEur();
     })
 
-    restartButton.addEventListener("click", function () {
+    restartButton.addEventListener('click', function () {
         defaultSortTable();
     })
 
     tableHeaders.forEach((element: HTMLElement, index: number) => {
-        element.addEventListener("click", function () {
+        element.addEventListener('click', function () {
             if (index > 2) return
 
             const clickedHeaderId: number = Number(this.id.split('_')[1]);
@@ -63,23 +63,36 @@ window.onload = () => {
         const exchangeRate: number = Number(exchangeRateInput.value);
 
         if (characterNumbers < 5) {
-            callAlert(transactionInput, alert('please type at least 5 characters'))
+            callAlert(transactionInput, alert('Please type at least 5 characters'));
+
+            isValid = 0;
+        } else if (characterNumbers > 50) {
+            callAlert(transactionInput, alert(`Cannot add title longer than 50 characters. You have inserted already: ${characterNumbers}`));
 
             isValid = 0;
         } else if (!amount) {
-            callAlert(amountInput, alert('Insert right amount'))
+            callAlert(amountInput, alert('Insert right amount'));
 
             isValid = 0;
         } else if (amount < 0) {
-            callAlert(amountInput, alert('The amount cannot be negative'))
+            callAlert(amountInput, alert('The amount cannot be negative'));
 
             isValid = 0;
+        } else if (amount > 9999999) {
+            callAlert(amountInput, alert('The amount cannot higher than 999999'));
+
+            isValid = 0;
+
         } else if (!exchangeRate) {
-            callAlert(exchangeRateInput, alert('Insert exchange rate'))
+            callAlert(exchangeRateInput, alert('Insert exchange rate'));
 
             isValid = 0;
         } else if (exchangeRate < 0) {
-            callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'))
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'));
+
+            isValid = 0;
+        } else if (exchangeRate > 1000) {
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be higher than 1000'));
 
             isValid = 0;
         }
@@ -94,31 +107,34 @@ window.onload = () => {
         const exchangeRate: number = Number(exchangeRateInput.value);
 
         if (!exchangeRate) {
-            callAlert(exchangeRateInput, alert('Insert exchange rate'))
+            callAlert(exchangeRateInput, alert('Insert exchange rate'));
 
             isValid = 0;
 
         } else if (exchangeRate < 0) {
-            callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'))
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be negative'));
+
+            isValid = 0;
+        } else if (exchangeRate > 1000) {
+            callAlert(exchangeRateInput, alert('The exchange rate cannot be higher than 1000'));
 
             isValid = 0;
         } else if (amount < 0) {
-            callAlert(amountInput, alert('The amount cannot be negative'))
+            callAlert(amountInput, alert('The amount cannot be negative'));
 
             isValid = 0;
         } else if (!isTableExist) {
             alert('Insert any value to update table');
 
             isValid = 0;
-
         }
 
         return Boolean(isValid);
     }
 
-    function validationForROundDecimalPoint(inputField: HTMLInputElement, decimalPointLength: number = 2): void {
+    function validationForDecimalPoint(inputField: HTMLInputElement, decimalPointLength: number = 2): void {
         const inputValue: string = inputField.value;
-        const inputValueDecimalPoint: string = inputValue.split(".")[1] || '0';
+        const inputValueDecimalPoint: string = inputValue.split('.')[1] || '0';
         const inputValueDecimalPointCounter: number = inputValueDecimalPoint.length;
 
         if (!inputValueDecimalPoint) return
@@ -128,15 +144,16 @@ window.onload = () => {
         }
     }
 
-    function addRow(title: string, amount: string): HTMLTableRowElement {
+    function addRow(title: string, amount: number): HTMLTableRowElement {
         const row: HTMLTableRowElement = document.createElement('tr');
-        row.id = "row_" + rowCounter;
+        row.id = 'row_' + rowCounter;
         let column: HTMLTableCellElement;
-        let exchangeRate: number = Number(exchangeRateInput.value)
+        let exchangeRate: number = Number(exchangeRateInput.value);
 
         for (let i = 0; i < 4; i++) {
-            let text: string = ((i === 0) ? title : (i === 1) ? amount : (i === 2) ? String(calculatePlnToEur(Number(amount), exchangeRate)) : '')
-            let id: string = ((i === 0) ? 'titleTd' : (i === 1) ? 'amountPlnTd' : (i === 2) ? 'amountEurTd' : '')
+            let text: string = ((i === 0) ? title : (i === 1) ? String(amount.toFixed(2)) : (i === 2) ? calculatePlnToEur(amount, exchangeRate).toFixed(2) : '');
+            let id: string = ((i === 0) ? 'titleTd' : (i === 1) ? 'amountPlnTd' : (i === 2) ? 'amountEurTd' : '');
+            console.log(text);
             column = createColumn(text, id);
 
             if (i == 3) {
@@ -146,11 +163,12 @@ window.onload = () => {
             row.appendChild(column);
         }
         rowCounter++;
+
         return row;
 
         function createColumn(value: string, id: string = ''): HTMLTableCellElement {
             const column: HTMLTableCellElement = document.createElement('td');
-            column.id = id
+            column.id = id;
             column.innerText = value;
 
             return column;
@@ -163,8 +181,8 @@ window.onload = () => {
             button.id = 'deleteButton';
             column.appendChild(button);
 
-            button.addEventListener("click", function () {
-                const rowId: string = this.closest("tr").id
+            button.addEventListener('click', function () {
+                const rowId: string = this.closest('tr').id
                 deleteRow(rowId);
                 updateSumValue();
             })
@@ -185,15 +203,15 @@ window.onload = () => {
         const totalPln: number = sumAllPlnAmounts();
         const totalEur: number = sumAllEurAmounts();
         const sum: HTMLElement = document.getElementById('sum');
-        const filledSumTemplate: string = SUM_TEMPLATE.replace('{amountPln}', totalPln.toFixed(2)).replace('{amountEur}', totalEur.toFixed(2))
-        sum.innerText = filledSumTemplate
+        const filledSumTemplate: string = SUM_TEMPLATE.replace('{amountPln}', totalPln.toFixed(2)).replace('{amountEur}', totalEur.toFixed(2));
+        sum.innerText = filledSumTemplate;
     }
 
     function sumAllPlnAmounts(): number {
         const valuesArray: number[] = [];
         const allValuesArray: NodeListOf < HTMLElement > = document.querySelectorAll('#amountPlnTd');
         allValuesArray.forEach(element => {
-            valuesArray.push(Number(element.innerHTML))
+            valuesArray.push(Number(element.innerHTML));
         })
 
         const getTotal = (total: number, num: number): number => Number((total + num).toFixed(2));
@@ -206,7 +224,7 @@ window.onload = () => {
         const valuesArray: number[] = [];
         const allValuesArray: NodeListOf < HTMLElement > = document.querySelectorAll('#amountEurTd');
         allValuesArray.forEach(element => {
-            valuesArray.push(Number(element.innerHTML))
+            valuesArray.push(Number(element.innerHTML));
         })
 
         const getTotal = (total: number, num: number): number => Number((total + num).toFixed(2));
@@ -223,7 +241,7 @@ window.onload = () => {
             const eurValue: number = calculatePlnToEur(plnValue, exchangeRate);
             const sibling: HTMLElement = element.nextSibling as HTMLElement;
 
-            sibling.innerText = eurValue.toString();
+            sibling.innerText = eurValue.toFixed(2);
         })
 
         updateSumValue();
@@ -234,9 +252,9 @@ window.onload = () => {
 
         changeInputBackground(inputField, 'red');
         alertMessage;
-        inputField.addEventListener("click", function () {
-            changeInputBackground(inputField, null)
-            inputField.removeEventListener("click", () => inputField)
+        inputField.addEventListener('click', function () {
+            changeInputBackground(inputField, null);
+            inputField.removeEventListener('focus', () => inputField);
         })
     }
 
@@ -248,17 +266,18 @@ window.onload = () => {
     function defaultSortTable() {
         let i: number;
         let shouldSwitch: boolean = false;
+        let switchCount: number = 0;
         let switching: boolean = true;
         while (switching) {
             switching = false;
-            const rows: NodeListOf < HTMLTableRowElement > = document.querySelectorAll("tr");
+            const rows: NodeListOf < HTMLTableRowElement > = document.querySelectorAll('tr');
 
             for (i = 1; i < (rows.length - 1); i++) {
                 shouldSwitch = false;
-                const x: number = Number(rows[i].id.split("_")[1]);
-                const y: number = Number(rows[i + 1].id.split("_")[1]);;
+                const firstElement: number = Number(rows[i].id.split('_')[1]);
+                const secondElement: number = Number(rows[i + 1].id.split('_')[1]);;
 
-                if (x > y) {
+                if (firstElement > secondElement) {
                     tableHeaders.forEach((thElement: HTMLElement) => {
                         clearArrows(thElement.children[0] as HTMLElement);
                     })
@@ -270,6 +289,7 @@ window.onload = () => {
             if (shouldSwitch) {
                 rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
                 switching = true;
+                switchCount++;
             }
         }
     }
@@ -280,38 +300,65 @@ window.onload = () => {
         let shouldSwitch: boolean = false;
         let switchCount: number = 0;
         let switching: boolean = true;
-        let sortingDirection: string = "asc";
-        const tableHeadersClicked: HTMLTableCellElement = document.getElementsByTagName("th")[columnId];
+        let sortingDirection: string = 'asc';
+        const tableHeadersClicked: HTMLTableCellElement = document.getElementsByTagName('th')[columnId];
         const arrowElement: HTMLTableElement = tableHeadersClicked.children[0] as HTMLTableElement;
 
         while (switching) {
             switching = false;
-            const rows: NodeListOf < HTMLTableRowElement > = document.querySelectorAll("tr");
+            const rows: NodeListOf < HTMLTableRowElement > = document.querySelectorAll('tr');
 
             for (i = 1; i < (rows.length - 1); i++) {
                 shouldSwitch = false;
-                const x: HTMLTableCellElement = rows[i].getElementsByTagName("td")[columnId];
-                const y: HTMLTableCellElement = rows[i + 1].getElementsByTagName("td")[columnId];
+                const firstElement: HTMLTableCellElement = rows[i].getElementsByTagName('td')[columnId];
+                const secondElement: HTMLTableCellElement = rows[i + 1].getElementsByTagName('td')[columnId];
+                const compareOneNumber: number = Number(firstElement.innerText);
+                const compareTwoNumber: number = Number(secondElement.innerText);
+                const compareOneString: string = firstElement.innerText;
+                const compareTwoString: string = secondElement.innerText;
 
-                if (sortingDirection === "asc") {
-                    if (x.innerText.toLowerCase() > y.innerHTML.toLowerCase()) {
-                        tableHeaders.forEach((thElement: HTMLElement) => {
-                            clearArrows(thElement.children[0] as HTMLElement);
-                        })
-                        arrowElement.classList.value = "arrowUp";
-                        shouldSwitch = true;
-                        break;
+                if (compareOneNumber) {
+                    if (sortingDirection === 'asc') {
+                        if (compareOneNumber > compareTwoNumber) {
+                            tableHeaders.forEach((thElement: HTMLElement) => {
+                                clearArrows(thElement.children[0] as HTMLElement);
+                            })
+                            arrowElement.classList.value = 'arrowUp';
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (sortingDirection === 'desc') {
+                        if (compareOneNumber < compareTwoNumber) {
+                            tableHeaders.forEach((thElement: HTMLElement) => {
+                                clearArrows(thElement.children[0] as HTMLElement);
+                            })
+                            arrowElement.classList.value = 'arrowDown';
+                            shouldSwitch = true;
+                            break;
+                        }
                     }
-                } else if (sortingDirection === "desc") {
-                    if (x.innerText.toLowerCase() < y.innerHTML.toLowerCase()) {
-                        tableHeaders.forEach((thElement: HTMLElement) => {
-                            clearArrows(thElement.children[0] as HTMLElement);
-                        })
-                        arrowElement.classList.value = "arrowDown";
-                        shouldSwitch = true;
-                        break;
+                } else {
+                    if (sortingDirection === 'asc') {
+                        if (compareOneString.toLocaleLowerCase() > compareTwoString.toLocaleLowerCase()) {
+                            tableHeaders.forEach((thElement: HTMLElement) => {
+                                clearArrows(thElement.children[0] as HTMLElement);
+                            })
+                            arrowElement.classList.value = 'arrowUp';
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (sortingDirection === 'desc') {
+                        if (compareOneString.toLocaleLowerCase() < compareTwoString.toLocaleLowerCase()) {
+                            tableHeaders.forEach((thElement: HTMLElement) => {
+                                clearArrows(thElement.children[0] as HTMLElement);
+                            })
+                            arrowElement.classList.value = 'arrowDown';
+                            shouldSwitch = true;
+                            break;
+                        }
                     }
                 }
+
             }
 
             if (switchCount === 0) lastSortedElement = column;
@@ -321,19 +368,19 @@ window.onload = () => {
                 switching = true;
                 switchCount++;
             } else {
-                if (switchCount === 0 && sortingDirection === "asc" && lastSortedElement == column) {
-                    sortingDirection = "desc";
+                if (switchCount === 0 && sortingDirection === 'asc' && lastSortedElement == column) {
+                    sortingDirection = 'desc';
                     switching = true;
                 }
             }
         }
     }
 
-    function clearArrows(arrow: HTMLElement) {
+    function clearArrows(arrow: HTMLElement): void {
         if (arrow) {
-            arrow.classList.add("arrowNone");
-            arrow.classList.remove("arrowUp");
-            arrow.classList.remove("arrowDown");
+            arrow.classList.add('arrowNone');
+            arrow.classList.remove('arrowUp');
+            arrow.classList.remove('arrowDown');
         }
     }
 }
